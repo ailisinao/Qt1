@@ -1,0 +1,173 @@
+#include "mainwindow.h"
+#include "./ui_mainwindow.h"
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+    connect(ui->num0 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num1 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num2 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num3 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num4 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num5 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num6 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num7 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num8 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+    connect(ui->num9 ,SIGNAL(clicked()) ,this ,SLOT(btnNumberClicked()));
+
+    connect(ui->plus ,SIGNAL(clicked()) ,this ,SLOT(btnBinaryOperatorClicked()));
+    connect(ui->minus ,SIGNAL(clicked()) ,this ,SLOT(btnBinaryOperatorClicked()));
+    connect(ui->multiple ,SIGNAL(clicked()) ,this ,SLOT(btnBinaryOperatorClicked()));
+    connect(ui->divide ,SIGNAL(clicked()) ,this ,SLOT(btnBinaryOperatorClicked()));
+    connect(ui->equal ,SIGNAL(clicked()) ,this ,SLOT(btnEqualClicked()));
+
+    connect(ui->C, SIGNAL(clicked()), this, SLOT(on_C_clicked()));
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+QString MainWindow::calculation(bool *ok)
+{
+    double result = 0;
+    if(operands.size() == 2 && opcodes.size() > 0){
+        qDebug() << "进来了 ";
+        //取操作数
+        double operand1 = operands.front().toDouble();
+        operands.pop_front();
+        double operand2 = operands.front().toDouble();
+        operands.pop_front();
+
+        //取操作符
+        QString op = opcodes.front();
+        opcodes.pop_front();
+
+        if(op == "+"){
+            result = operand1 + operand2;
+        }else if(op == "-"){
+            result = operand1 - operand2;
+        }else if(op == "×"){
+            result = operand1 * operand2;
+        }else if(op == "➗"){
+            result = operand1 / operand2;
+        }
+    }
+    return QString::number(result);
+}
+
+void MainWindow::btnNumberClicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    QString str = qobject_cast<QPushButton*>(sender())->text();
+    ui->lineEdit->setText(oriStr + str);
+}
+
+void MainWindow::btnBinaryOperatorClicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    operands.push(oriStr);
+    QString op = qobject_cast<QPushButton*>(sender())->text();
+    opcodes.push(op);
+    ui->lineEdit->clear();
+
+}
+
+
+void MainWindow::on_point_clicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    QString str = qobject_cast<QPushButton*>(sender())->text();
+    if(!oriStr.contains("."))
+        ui->lineEdit->setText(oriStr + str);
+}
+
+
+void MainWindow::on_del_clicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    if(!oriStr.isEmpty())
+        ui->lineEdit->setText(oriStr.left(oriStr.length() - 1));
+}
+
+void MainWindow::btnEqualClicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    operands.push(oriStr);
+    QString result = calculation();
+    ui->lineEdit->setText(result);
+    
+    qDebug() << "计算结果: " << result;
+    qDebug() << "操作数栈: " << operands;
+    qDebug() << "操作符栈: " << opcodes;
+}   
+
+
+void MainWindow::on_C_clicked()
+{
+    ui->lineEdit->clear();
+    operands.clear();
+    opcodes.clear();
+}   
+
+
+
+void MainWindow::on_CE_clicked()
+{
+    ui->lineEdit->clear();
+}
+
+void MainWindow::on_plusOrReduce_clicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    if (!oriStr.isEmpty()) {
+        double value = oriStr.toDouble();
+        value = -value;
+        ui->lineEdit->setText(QString::number(value));
+    }
+}
+
+void MainWindow::on_reciprocal_clicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    if (!oriStr.isEmpty()) {
+        double value = oriStr.toDouble();
+        if (value != 0) {
+            value = 1 / value;
+            ui->lineEdit->setText(QString::number(value));
+        }
+    }
+}
+
+void MainWindow::on_logarithm_clicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    if (!oriStr.isEmpty()) {
+        double value = oriStr.toDouble();
+        if (value >= 0) {
+            value = sqrt(value);
+            ui->lineEdit->setText(QString::number(value));
+        }
+    }
+}
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    if (!oriStr.isEmpty()) {
+        double value = oriStr.toDouble();
+        value = value * value;
+        ui->lineEdit->setText(QString::number(value));
+    }
+}
+
+void MainWindow::on_takeRemainder_clicked()
+{
+    QString oriStr = ui->lineEdit->text();
+    operands.push(oriStr);
+    opcodes.push("%");
+    ui->lineEdit->clear();
+}
